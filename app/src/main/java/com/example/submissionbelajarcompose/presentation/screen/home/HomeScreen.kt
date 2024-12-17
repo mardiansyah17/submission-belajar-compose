@@ -13,50 +13,53 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.submissionbelajarcompose.presentation.components.CardRecipe
+import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
 import com.example.submissionbelajarcompose.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(
+    navHostController: NavHostController,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-}
+    val listRecipe by homeViewModel.recipes.collectAsState()
 
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview(showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    AppTheme {
-        Scaffold(
-            floatingActionButton = {
-                FloatingActionButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
-            },
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navHostController.navigate(NavigationGraph.CreateScreen.route) }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
+            }
+        },
 
-            ) { pading ->
+        ) { pading ->
 
-            Box(
-                modifier = Modifier.padding(pading)
+        Box(
+            modifier = Modifier.padding(pading)
+        ) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxSize()
             ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxSize()
-                ) {
-                    items(4) {
-                        CardRecipe()
-                    }
+                items(listRecipe.size) {
+                    val recipe = listRecipe[it]
+                    CardRecipe(
+                        title = recipe.title,
+                        description = recipe.description,
+                        imageUrl = recipe.imageUrl
+                    )
                 }
             }
         }

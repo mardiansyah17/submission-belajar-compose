@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 android {
@@ -22,6 +25,16 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        val keystoreFile = project.rootProject.file("local.properties")
+        val properties = Properties()
+        properties.load(keystoreFile.inputStream())
+
+        buildConfigField("String", "SUPABASE_URL", properties.getProperty("supabaseUrl") ?: "")
+        buildConfigField(
+            "String",
+            "SUPABASE_ANON_KEY",
+            properties.getProperty("supabaseAnonKey") ?: ""
+        )
     }
 
     buildTypes {
@@ -42,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -82,6 +96,16 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.lottie.compose)
 
 
+    val supabase_version = "3.0.0"
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:$supabase_version"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+
+    implementation("io.ktor:ktor-client-core:3.0.2")
+    implementation("io.ktor:ktor-client-cio:3.0.2")
 }

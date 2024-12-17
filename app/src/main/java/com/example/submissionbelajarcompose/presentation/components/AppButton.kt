@@ -70,6 +70,7 @@ private fun ButtonContent(text: String) {
         text = text,
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(8.dp),
+        color = Color.White
     )
 }
 

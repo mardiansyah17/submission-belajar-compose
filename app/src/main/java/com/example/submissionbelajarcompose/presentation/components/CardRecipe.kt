@@ -28,12 +28,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.submissionbelajarcompose.R
 import com.example.submissionbelajarcompose.ui.theme.AppTheme
 
 
 @Composable
-fun CardRecipe() {
+fun CardRecipe(
+    title: String,
+    description: String,
+    imageUrl: String,
+) {
     Box(
         Modifier
             .height(100.dp)
@@ -46,35 +51,43 @@ fun CardRecipe() {
     ) {
         Row {
             Image(
-                painter = painterResource(id = R.drawable.nasi_goreng),
+                painter = rememberAsyncImagePainter(imageUrl),
                 contentDescription = "Recipe Image",
                 modifier = Modifier
                     .width(125.dp)
                     .fillMaxHeight(),
                 contentScale = ContentScale.Crop
             )
-            Text(
-                "Nasi Goreng",
-                modifier = Modifier.padding(10.dp),
-                style = MaterialTheme.typography.titleSmall,
-            )
-        }
-    }
-}
+            Column {
+                Text(
+                    title,
+                    modifier = Modifier.padding(10.dp),
+                    style = MaterialTheme.typography.titleSmall,
+                )
 
-@Composable
-@Preview(showSystemUi = true)
-fun CardRecipePreview() {
-    AppTheme {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize()
-        ) {
-            items(4) {
-                CardRecipe()
+                Text(
+                    description,
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                )
             }
         }
     }
 }
+
+//@Composable
+//@Preview(showSystemUi = true)
+//fun CardRecipePreview() {
+//    AppTheme {
+//        LazyColumn(
+//            verticalArrangement = Arrangement.spacedBy(10.dp),
+//            modifier = Modifier
+//                .padding(10.dp)
+//                .fillMaxSize()
+//        ) {
+//            items(4) {
+//                CardRecipe()
+//            }
+//        }
+//    }
+//}
