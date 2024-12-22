@@ -1,6 +1,5 @@
 package com.example.submissionbelajarcompose.presentation.screen.home
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -16,13 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.submissionbelajarcompose.presentation.components.CardRecipe
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
-import com.example.submissionbelajarcompose.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(
@@ -58,7 +55,14 @@ fun HomeScreen(
                     CardRecipe(
                         title = recipe.title,
                         description = recipe.description,
-                        imageUrl = recipe.imageUrl
+                        imageUrl = recipe.imageUrl,
+                        onClick = {
+                            navHostController.navigate("detail_screen/${recipe.id}")
+                        },
+                        onEdit = {},
+                        onDelete = {
+                            homeViewModel.deleteRecipe(recipe.id)
+                        }
                     )
                 }
             }

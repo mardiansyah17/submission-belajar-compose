@@ -46,4 +46,35 @@ class RecipeRepository @Inject constructor(
             throw e
         }
     }
+
+    suspend fun getRecipe(id: String): Recipe {
+        return try {
+            val documentSnapshot = firestore.collection("recipes")
+                .document(id)
+                .get()
+                .await()
+            Recipe(
+                id = documentSnapshot.id,
+                title = documentSnapshot.getString("title")!!,
+                description = documentSnapshot.getString("description")!!,
+                imageUrl = documentSnapshot.getString("imageUrl")!!,
+                ingredients = documentSnapshot.get("ingredients") as List<String>
+            )
+        } catch (e: Exception) {
+            Log.e("RecipeRepository", "Error getting recipe", e)
+            throw e
+        }
+    }
+
+    suspend fun deleteRecipe(id: String) {
+        try {
+            firestore.collection("recipes")
+                .document(id)
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            Log.e("RecipeRepository", "Error deleting recipe", e)
+            throw e
+        }
+    }
 }

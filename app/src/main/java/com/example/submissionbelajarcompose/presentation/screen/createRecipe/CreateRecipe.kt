@@ -43,7 +43,6 @@ import com.example.submissionbelajarcompose.presentation.components.DialogMessag
 import com.example.submissionbelajarcompose.presentation.components.InputTextField
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
 
-
 @Composable
 fun CreateRecipe(
     navHostController: NavHostController,
@@ -60,7 +59,6 @@ fun CreateRecipe(
             viewModel.onEvent(CreateRecipeEvent.OnValueChange(uri.toString(), "imageUrl"))
         }
     }
-
     if (viewModel.successMsg.value.isNotEmpty()) {
         DialogMessage(
 
@@ -77,11 +75,8 @@ fun CreateRecipe(
                     Text("Oke")
                 }
             },
-
-
-            )
+        )
     }
-
     ConstraintLayout(
         Modifier.fillMaxSize()
     ) {

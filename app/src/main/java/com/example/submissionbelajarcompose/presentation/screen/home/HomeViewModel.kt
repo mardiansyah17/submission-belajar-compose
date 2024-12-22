@@ -45,6 +45,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun deleteRecipe(id: String) {
+        viewModelScope.launch {
+            try {
+                recipeRepository.deleteRecipe(id)
+                getRecipes()
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteRecipe: ", e)
+            }
+        }
+    }
+
+
     companion object {
         private const val TAG = "HomeViewModel"
     }
