@@ -77,4 +77,16 @@ class RecipeRepository @Inject constructor(
             throw e
         }
     }
+
+    suspend fun updateRecipe(recipe: Recipe) {
+        try {
+            firestore.collection("recipes")
+                .document(recipe.id)
+                .set(recipe)
+                .await()
+        } catch (e: Exception) {
+            Log.e("RecipeRepository", "Error updating recipe", e)
+            throw e
+        }
+    }
 }
