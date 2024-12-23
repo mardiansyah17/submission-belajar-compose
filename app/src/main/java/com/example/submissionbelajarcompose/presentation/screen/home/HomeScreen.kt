@@ -57,7 +57,7 @@ fun HomeScreen(
                         description = recipe.description,
                         imageUrl = recipe.imageUrl,
                         onClick = {
-                            navHostController.navigate(NavigationGraph.EditScreen(recipe.id).route)
+                            navHostController.navigate(NavigationGraph.DetailScreen(recipe.id).route)
                         },
                         onEdit = {},
                         onDelete = {

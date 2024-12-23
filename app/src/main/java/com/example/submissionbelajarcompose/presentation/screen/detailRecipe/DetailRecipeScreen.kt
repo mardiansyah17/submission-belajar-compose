@@ -1,16 +1,19 @@
 package com.example.submissionbelajarcompose.presentation.screen.detailRecipe
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +24,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.submissionbelajarcompose.R
+import com.example.submissionbelajarcompose.presentation.components.NotFoundLayout
 import com.example.submissionbelajarcompose.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,15 +71,25 @@ fun DetailRecipeScreen(
             )
         }
     ) { padding ->
+
         Box(
             modifier = Modifier.padding(padding)
         ) {
-            if (recipe == null) {
-                return@Box Box(
-                    modifier = Modifier.fillMaxWidth()
+
+            if (viewModel.loading.collectAsState().value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("404")
+                    CircularProgressIndicator()
                 }
+                return@Box
+            }
+
+            if (recipe == null) {
+                NotFoundLayout()
+                return@Box
             }
 
             LazyColumn {
@@ -91,27 +107,32 @@ fun DetailRecipeScreen(
                 item {
 
 
-                    Text(text = recipe.title, style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Box(
-                        Modifier.defaultMinSize(minHeight = 100.dp)
+                    Column(
+                        Modifier.padding(10.dp)
                     ) {
-                        Text(
-                            recipe.description,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                        Text(text = recipe.title, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text("Bahan:", style = MaterialTheme.typography.titleMedium)
+                        Box(
+                            Modifier.defaultMinSize(minHeight = 100.dp)
+                        ) {
+                            Text(
+                                recipe.description,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text("Bahan:", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
 
                 items(recipe.ingredients.size) {
                     val number = it + 1
                     Text(
                         "• ${recipe.ingredients[it]}",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 10.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }

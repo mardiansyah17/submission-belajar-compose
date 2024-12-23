@@ -13,7 +13,6 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -41,6 +40,7 @@ class EditRecipeViewModel @Inject constructor(
 
     val successMsg = mutableStateOf("")
     val loading = mutableStateOf(false)
+    val prevImage = mutableStateOf("")
 
     fun getRecipe(id: String) {
         viewModelScope.launch {
@@ -78,31 +78,39 @@ class EditRecipeViewModel @Inject constructor(
                 val recipe = editRecipeUiInfo.value
 
 
-//                val bucket = supabaseClient.storage.from("recipe")
-
-
                 viewModelScope.launch {
                     try {
+                        var imageUrl: String? = null
+                        if (prevImage.value.isNotEmpty()) {
+                            val bucket = supabaseClient.storage.from("recipe")
+                            val byteArray = withContext(Dispatchers.IO) {
+                                val inputStream: InputStream =
+                                    event.context.contentResolver.openInputStream(recipe.imageUrl.toUri())!!
+                                inputStream.readBytes()
+                            }
 
-//                        val byteArray = withContext(Dispatchers.IO) {
-//                            val inputStream: InputStream =
-//                                event.context.contentResolver.openInputStream(recipe.imageUrl.toUri())!!
-//                            inputStream.readBytes()
-//                        }
+                            val response = bucket.upload(
+                                "${Uuid.random()}.jpg",
+                                byteArray
+                            )
 
-//                        val response = bucket.upload(
-//                            "${Uuid.random()}.jpg",
-//                            byteArray
-//                        )
-//
-//                        val imageUrl = bucket.publicUrl(response.path)
+                            imageUrl = bucket.publicUrl(response.path)
+                            bucket.delete(listOf(prevImage.value.substringAfter("recipe/")))
+
+                        }
+
+                        val updateImage = if (prevImage.value.isNotEmpty()) {
+                            imageUrl!!
+                        } else {
+                            recipe.imageUrl
+                        }
 
                         recipeRepository.updateRecipe(
                             Recipe(
                                 event.id,
                                 recipe.title,
                                 recipe.description,
-                                recipe.imageUrl,
+                                updateImage,
                                 recipe.ingredients.filter { it.isNotEmpty() }
 
                             )
@@ -142,13 +150,17 @@ class EditRecipeViewModel @Inject constructor(
             "description" -> editRecipeUiInfo.value =
                 editRecipeUiInfo.value.copy(description = value)
 
-            "imageUrl" -> editRecipeUiInfo.value = editRecipeUiInfo.value.copy(imageUrl = value)
+            "imageUrl" -> {
+                prevImage.value = editRecipeUiInfo.value.imageUrl
+                editRecipeUiInfo.value = editRecipeUiInfo.value.copy(imageUrl = value)
+
+            }
 
         }
     }
 
     companion object {
-        private const val TAG = "CreateRecipeViewModel"
+        private const val TAG = "EditRecipeViewModel"
     }
 }
 
@@ -162,5 +174,5 @@ data class EditRecipeUiInfo(
 sealed interface EditRecipeEvent {
     data class OnValueChange(val value: String, val field: String) : EditRecipeEvent
     data class OnIngredientChange(val value: String, val index: Int) : EditRecipeEvent
-    data class UpdateRecipe(val id: String) : EditRecipeEvent
+    data class UpdateRecipe(val id: String, val context: Context) : EditRecipeEvent
 }

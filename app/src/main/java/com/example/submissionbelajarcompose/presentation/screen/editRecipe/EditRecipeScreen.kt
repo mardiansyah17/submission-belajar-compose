@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,10 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -99,7 +105,55 @@ fun EditRecipeScreen(
     ConstraintLayout(
         Modifier.fillMaxSize()
     ) {
-        val (content, button) = createRefs()
+        val (content, button, image, editImageBtn) = createRefs()
+
+
+
+
+        Box(
+            Modifier
+                .width(350.dp)
+                .height(200.dp)
+                .background(Color.Gray)
+                .constrainAs(image) {
+                    top.linkTo(parent.top, margin = 50.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(uiInfo.imageUrl),
+                contentDescription = "Image",
+                Modifier
+                    .fillMaxSize()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+
+            )
+
+        }
+
+        IconButton(
+            onClick = {
+                launcher.launch(
+                    Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    )
+                )
+            },
+            modifier = Modifier
+                .size(50.dp)
+                .clip(MaterialTheme.shapes.extraLarge)
+                .background(Color.Black.copy(alpha = 0.2f))
+                .constrainAs(editImageBtn) {
+                    top.linkTo(image.top, margin = 10.dp)
+                    end.linkTo(image.end, margin = 10.dp)
+                },
+
+            ) {
+            Icon(Icons.Default.Edit, contentDescription = "Edit Image")
+        }
 
         LazyColumn(
             Modifier
@@ -107,82 +161,14 @@ fun EditRecipeScreen(
                 .fillMaxSize()
 
                 .constrainAs(content) {
-                    top.linkTo(parent.top, margin = 100.dp)
+                    top.linkTo(image.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    bottom.linkTo(button.top)
                 }
         ) {
             item {
                 Column {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    ) {
-                        if (uiInfo.imageUrl.isNotEmpty()) {
-                            Image(
-                                painter = rememberAsyncImagePainter(uiInfo.imageUrl),
-                                contentDescription = "Image",
-                                Modifier
-                                    .fillMaxSize()
-                                    .height(200.dp)
-                            )
-                        } else {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .drawBehind {
-                                        drawRoundRect(
-                                            Color.Gray,
-                                            style = Stroke(
-                                                width = 4f,
-                                                pathEffect = PathEffect.dashPathEffect(
-                                                    floatArrayOf(10f, 5f),
-                                                    0f
-                                                )
-                                            )
-                                        )
-                                    }
-                                    .clickable {
-                                        val galleryIntent =
-                                            Intent(Intent.ACTION_GET_CONTENT).apply {
-                                                type = "image/*"
-                                            }
 
-                                        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
-                                        val chooser = Intent(Intent.ACTION_CHOOSER).apply {
-                                            putExtra(Intent.EXTRA_INTENT, galleryIntent)
-                                            putExtra(Intent.EXTRA_TITLE, "Select from:")
-                                            putExtra(
-                                                Intent.EXTRA_INITIAL_INTENTS,
-                                                arrayOf(cameraIntent)
-                                            )
-                                        }
-
-                                        launcher.launch(chooser)
-
-                                    }
-                            ) {
-                                Column(
-                                    Modifier.fillParentMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.Image,
-                                        contentDescription = "Image",
-                                        Modifier.size(50.dp)
-                                    )
-                                    Text(
-                                        text = "Add Image",
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                }
-                            }
-                        }
-                    }
 
                     InputTextField(
                         text = uiInfo.title,
@@ -240,7 +226,7 @@ fun EditRecipeScreen(
                 }
         ) {
 
-            viewModel.onEvent(EditRecipeEvent.UpdateRecipe(id))
+            viewModel.onEvent(EditRecipeEvent.UpdateRecipe(id, context))
 
         }
     }
