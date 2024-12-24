@@ -26,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.submissionbelajarcompose.presentation.components.CardRecipe
 import com.example.submissionbelajarcompose.presentation.components.EmptyLayout
+import com.example.submissionbelajarcompose.presentation.components.InputTextField
 import com.example.submissionbelajarcompose.presentation.components.PullToRefreshBox
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
 
@@ -39,7 +40,7 @@ fun HomeScreen(
     val listRecipe by homeViewModel.recipes.collectAsState()
     val state = rememberPullToRefreshState()
     val isRefreshing = remember { mutableStateOf(false) }
-
+    val loading = homeViewModel.loading.collectAsState().value
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -57,6 +58,7 @@ fun HomeScreen(
         ) { pading ->
 
         PullToRefreshBox(
+            state = state,
             modifier = Modifier.padding(pading),
             isRefreshing = isRefreshing.value,
             onRefresh = {
@@ -64,25 +66,6 @@ fun HomeScreen(
             }
         ) {
 
-            if (homeViewModel.loading.collectAsState().value) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-                return@PullToRefreshBox
-            }
-
-            if (listRecipe.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    EmptyLayout()
-                }
-                return@PullToRefreshBox
-            }
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -90,8 +73,52 @@ fun HomeScreen(
                     .padding(10.dp)
                     .fillMaxSize()
             ) {
-                items(listRecipe.size) {
-                    val recipe = listRecipe[it]
+                // Input untuk pencarian
+                item {
+                    InputTextField(
+                        text = homeViewModel.query.value,
+                        maxLine = 1,
+                        label = "Cari Resep",
+                    ) {
+                        homeViewModel.query.value = it
+                        homeViewModel.searchRecipe(it)
+                    }
+                }
+
+                // Loading Indicator
+                if (loading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    // Berhenti di sini, tidak melanjutkan ke elemen lainnya jika masih loading
+                    return@LazyColumn
+                }
+
+                // Empty State
+                if (listRecipe.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            EmptyLayout()
+                        }
+                    }
+                    return@LazyColumn
+                }
+
+
+
+
+                items(homeViewModel.recipes.value.size) { index ->
+                    val recipe = listRecipe[index]
                     CardRecipe(
                         title = recipe.title,
                         description = recipe.description,
@@ -106,6 +133,7 @@ fun HomeScreen(
                     )
                 }
             }
+
         }
     }
 }

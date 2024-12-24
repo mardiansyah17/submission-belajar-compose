@@ -35,6 +35,18 @@ class DetailRecipeViewModel @Inject constructor(
         }
     }
 
+    fun updateFavoriteRecipe(id: String, isFavorite: Boolean) {
+        viewModelScope.launch {
+            try {
+                recipeRepository.updateFavorite(id = id, isFavorite = isFavorite)
+                _recipe.value = recipe.value?.copy(isFavorite = isFavorite)
+
+            } catch (e: Exception) {
+                Log.e(TAG, "updateFavoriteRecipe: ${e.message}")
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "DetailRecipeViewModel"
     }

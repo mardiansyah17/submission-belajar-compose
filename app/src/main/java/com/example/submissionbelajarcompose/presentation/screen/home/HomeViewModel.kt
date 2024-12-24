@@ -26,10 +26,11 @@ class HomeViewModel @Inject constructor(
     val recipes: StateFlow<List<Recipe>> = _recipes
 
     private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+
+    val query = mutableStateOf("")
 
     init {
         getRecipes()
@@ -61,6 +62,20 @@ class HomeViewModel @Inject constructor(
                 getRecipes()
             } catch (e: Exception) {
                 Log.e(TAG, "deleteRecipe: ", e)
+            }
+        }
+    }
+
+    fun searchRecipe(text: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val recipesResult = recipeRepository.searchRecipe(text)
+                _recipes.value = recipesResult
+            } catch (e: Exception) {
+                Log.e(TAG, "searchRecipe: ", e)
+            } finally {
+                _loading.value = false
             }
         }
     }

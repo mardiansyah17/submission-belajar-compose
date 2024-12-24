@@ -58,7 +58,8 @@ class RecipeRepository @Inject constructor(
                 title = documentSnapshot.getString("title")!!,
                 description = documentSnapshot.getString("description")!!,
                 imageUrl = documentSnapshot.getString("imageUrl")!!,
-                ingredients = documentSnapshot.get("ingredients") as List<String>
+                ingredients = documentSnapshot.get("ingredients") as List<String>,
+                isFavorite = documentSnapshot.getBoolean("isFavorite")
             )
         } catch (e: Exception) {
             Log.e("RecipeRepository", "Error getting recipe", e)
@@ -86,6 +87,47 @@ class RecipeRepository @Inject constructor(
                 .await()
         } catch (e: Exception) {
             Log.e("RecipeRepository", "Error updating recipe", e)
+            throw e
+        }
+    }
+
+    suspend fun searchRecipe(query: String): List<Recipe> {
+        return try {
+            val querySnapshot = firestore.collection("recipes")
+                .orderBy("titleLower")
+                .startAt(query)
+                .endAt(query + "\uf8ff")
+                .get()
+                .await()
+
+            Log.d("RecipeRepository", "Search query: $querySnapshot")
+
+            val mapData = querySnapshot.documents.map { document ->
+
+                Recipe(
+                    id = document.id,
+                    title = document.getString("title")!!,
+                    description = document.getString("description")!!,
+                    imageUrl = document.getString("imageUrl")!!,
+                    ingredients = document.get("ingredients") as List<String>
+                )
+
+            }
+            mapData
+        } catch (e: Exception) {
+            Log.e("RecipeRepository", "Error searching recipes", e)
+            throw e
+        }
+    }
+
+    suspend fun updateFavorite(id: String, isFavorite: Boolean) {
+        try {
+            firestore.collection("recipes")
+                .document(id)
+                .update("isFavorite", isFavorite)
+                .await()
+        } catch (e: Exception) {
+            Log.e("RecipeRepository", "Error updating favorite", e)
             throw e
         }
     }

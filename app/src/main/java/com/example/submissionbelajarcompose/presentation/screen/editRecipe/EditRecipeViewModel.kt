@@ -107,11 +107,11 @@ class EditRecipeViewModel @Inject constructor(
 
                         recipeRepository.updateRecipe(
                             Recipe(
-                                event.id,
-                                recipe.title,
-                                recipe.description,
-                                updateImage,
-                                recipe.ingredients.filter { it.isNotEmpty() }
+                                id = event.id,
+                                title = recipe.title,
+                                description = recipe.description,
+                                imageUrl = updateImage,
+                                ingredients = recipe.ingredients.filter { it.isNotEmpty() }
 
                             )
                         )

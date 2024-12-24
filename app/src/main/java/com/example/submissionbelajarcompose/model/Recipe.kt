@@ -6,4 +6,6 @@ data class Recipe(
     val description: String,
     val imageUrl: String,
     val ingredients: List<String>,
+    val isFavorite: Boolean? = false,
+    var titleLower: String? = "",
 )
