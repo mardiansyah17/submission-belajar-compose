@@ -37,6 +37,9 @@ class CreateRecipeViewModel @Inject constructor(
     }
 
     val successMsg = mutableStateOf("")
+    val errorMsg = mutableStateOf("")
+
+    val loading = mutableStateOf(false)
 
     @OptIn(ExperimentalUuidApi::class)
     fun onEvent(event: CreateRecipeEvent) {
@@ -59,7 +62,7 @@ class CreateRecipeViewModel @Inject constructor(
 
                 viewModelScope.launch {
                     try {
-
+                        loading.value = true
                         val byteArray = withContext(Dispatchers.IO) {
                             val inputStream: InputStream? =
                                 event.context.contentResolver.openInputStream(recipe.imageUrl.toUri())
@@ -89,6 +92,8 @@ class CreateRecipeViewModel @Inject constructor(
 
                     } catch (e: Exception) {
                         Log.e(TAG, "createRecipe: ", e)
+                    } finally {
+                        loading.value = false
                     }
                 }
             }

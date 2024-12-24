@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.submissionbelajarcompose.model.Recipe
 import com.example.submissionbelajarcompose.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val recipeRepository: RecipeRepository
+    private val recipeRepository: RecipeRepository,
+    private val supabaseClient: SupabaseClient
+
 ) : ViewModel() {
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
@@ -45,10 +49,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun deleteRecipe(id: String) {
+    fun deleteRecipe(id: String, urlImage: String) {
         viewModelScope.launch {
             try {
+                val bucket = supabaseClient.storage.from("recipe")
+                bucket.delete(listOf(urlImage.substringAfter("recipe/")))
+
+
                 recipeRepository.deleteRecipe(id)
+
                 getRecipes()
             } catch (e: Exception) {
                 Log.e(TAG, "deleteRecipe: ", e)

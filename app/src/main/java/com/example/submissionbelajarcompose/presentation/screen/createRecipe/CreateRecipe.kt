@@ -32,8 +32,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -211,14 +209,16 @@ fun CreateRecipe(
 
 
         }
-        AppButton("Simpan",
+        AppButton(
+            "Simpan",
             modifier = Modifier
                 .padding(10.dp)
                 .constrainAs(button) {
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
+                },
+            enabled = viewModel.loading.value.not()
         ) {
 
             viewModel.onEvent(CreateRecipeEvent.CreateRecipe(context))
