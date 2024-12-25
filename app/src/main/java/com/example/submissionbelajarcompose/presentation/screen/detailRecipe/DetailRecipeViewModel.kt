@@ -39,7 +39,7 @@ class DetailRecipeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 recipeRepository.updateFavorite(id = id, isFavorite = isFavorite)
-                _recipe.value = recipe.value?.copy(isFavorite = isFavorite)
+                _recipe.value = recipe.value?.copy(favorite = isFavorite)
 
             } catch (e: Exception) {
                 Log.e(TAG, "updateFavoriteRecipe: ${e.message}")

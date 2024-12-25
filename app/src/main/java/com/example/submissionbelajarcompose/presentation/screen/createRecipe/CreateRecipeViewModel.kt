@@ -84,10 +84,9 @@ class CreateRecipeViewModel @Inject constructor(
                                 recipe.description,
                                 imageUrl,
                                 recipe.ingredients.filter { it.isNotEmpty() },
-                                false,
                                 recipe.title.lowercase(),
-
-                                )
+                                false,
+                            )
                         )
 
                         successMsg.value = "Berhasil menambahkan resep"

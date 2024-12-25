@@ -39,7 +39,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.submissionbelajarcompose.presentation.components.AppButton
 import com.example.submissionbelajarcompose.presentation.components.DialogMessage
 import com.example.submissionbelajarcompose.presentation.components.InputTextField
-import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
 import com.example.submissionbelajarcompose.presentation.navigation.TabNavigationGraph
 
 @Composable
@@ -87,7 +86,7 @@ fun CreateRecipe(
                 .fillMaxSize()
 
                 .constrainAs(content) {
-                    top.linkTo(parent.top, margin = 100.dp)
+                    top.linkTo(parent.top, margin = 150.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     bottom.linkTo(button.top)
@@ -215,7 +214,7 @@ fun CreateRecipe(
             modifier = Modifier
                 .padding(10.dp)
                 .constrainAs(button) {
-                    bottom.linkTo(parent.bottom)
+                    bottom.linkTo(parent.bottom, margin = 80.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },

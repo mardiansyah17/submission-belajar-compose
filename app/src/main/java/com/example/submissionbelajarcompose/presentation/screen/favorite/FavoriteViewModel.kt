@@ -1,4 +1,4 @@
-package com.example.submissionbelajarcompose.presentation.screen.home
+package com.example.submissionbelajarcompose.presentation.screen.favorite
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class FavoriteViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
     private val supabaseClient: SupabaseClient
 
@@ -25,6 +25,7 @@ class HomeViewModel @Inject constructor(
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
 
+    private val _isRefreshing = MutableStateFlow(false)
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
@@ -32,14 +33,14 @@ class HomeViewModel @Inject constructor(
     val query = mutableStateOf("")
 
     init {
-        getRecipes()
+        getFavoriteRecipes()
     }
 
-    fun getRecipes() {
+    fun getFavoriteRecipes() {
         viewModelScope.launch {
             _loading.value = true
             try {
-                val recipesResult = recipeRepository.getRecipes()
+                val recipesResult = recipeRepository.getFavoriteRecipes()
                 _recipes.value = recipesResult
             } catch (e: Exception) {
                 Log.e(TAG, "getRecipes: ", e)
@@ -54,11 +55,8 @@ class HomeViewModel @Inject constructor(
             try {
                 val bucket = supabaseClient.storage.from("recipe")
                 bucket.delete(listOf(urlImage.substringAfter("recipe/")))
-
-
                 recipeRepository.deleteRecipe(id)
-
-                getRecipes()
+                getFavoriteRecipes()
             } catch (e: Exception) {
                 Log.e(TAG, "deleteRecipe: ", e)
             }

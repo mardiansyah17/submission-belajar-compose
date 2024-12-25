@@ -1,4 +1,4 @@
-package com.example.submissionbelajarcompose.presentation.screen.home
+package com.example.submissionbelajarcompose.presentation.screen.favorite
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,45 +20,34 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.submissionbelajarcompose.presentation.components.CardRecipe
 import com.example.submissionbelajarcompose.presentation.components.EmptyLayout
-import com.example.submissionbelajarcompose.presentation.components.InputTextField
 import com.example.submissionbelajarcompose.presentation.components.PullToRefreshBox
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun FavoriteScreen(
     navHostController: NavHostController,
-    homeViewModel: HomeViewModel = hiltViewModel()
+    viewModel: FavoriteViewModel = hiltViewModel()
 ) {
 
-    val listRecipe by homeViewModel.recipes.collectAsState()
+    val listRecipe by viewModel.recipes.collectAsState()
     val state = rememberPullToRefreshState()
     val isRefreshing = remember { mutableStateOf(false) }
-    val loading = homeViewModel.loading.collectAsState().value
+    val loading = viewModel.loading.collectAsState().value
     PullToRefreshBox(
         state = state,
         isRefreshing = isRefreshing.value,
         onRefresh = {
-            homeViewModel.getRecipes()
+            viewModel.getFavoriteRecipes()
         }
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = 10.dp, vertical = 10.dp)
                 .fillMaxSize()
         ) {
-            // Input untuk pencarian
-            item {
-                InputTextField(
-                    text = homeViewModel.query.value,
-                    maxLine = 1,
-                    label = "Cari Resep",
-                ) {
-                    homeViewModel.query.value = it
-                    homeViewModel.searchRecipe(it)
-                }
-            }
+
 
             if (loading) {
                 item {
@@ -82,7 +71,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         EmptyLayout(
-                            msg = "Hmm, masih kosong. Yuk, isi dengan resep lezat dan jadikan momen makan lebih bermakna!"
+                            msg = "Tidak ada resep favorit"
                         )
                     }
                 }
@@ -92,7 +81,7 @@ fun HomeScreen(
 
 
 
-            items(homeViewModel.recipes.value.size) { index ->
+            items(viewModel.recipes.value.size) { index ->
                 val recipe = listRecipe[index]
                 CardRecipe(
                     title = recipe.title,
@@ -103,7 +92,7 @@ fun HomeScreen(
                     },
                     onEdit = {},
                     onDelete = {
-                        homeViewModel.deleteRecipe(recipe.id, recipe.imageUrl)
+                        viewModel.deleteRecipe(recipe.id, recipe.imageUrl)
                     }
                 )
             }

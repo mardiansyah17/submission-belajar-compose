@@ -40,7 +40,7 @@ class EditRecipeViewModel @Inject constructor(
 
     val successMsg = mutableStateOf("")
     val loading = mutableStateOf(false)
-    val prevImage = mutableStateOf("")
+    private val prevImage = mutableStateOf("")
 
     fun getRecipe(id: String) {
         viewModelScope.launch {
