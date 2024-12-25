@@ -1,8 +1,9 @@
 package com.example.submissionbelajarcompose.presentation.screen.favorite
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -44,8 +46,7 @@ fun FavoriteScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .padding(horizontal = 10.dp, vertical = 10.dp)
-                .fillMaxSize()
+                .padding(horizontal = 10.dp)
         ) {
 
 
@@ -61,8 +62,13 @@ fun FavoriteScreen(
                 }
                 return@LazyColumn
             }
-
-            // Empty State
+            item {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .height(20.dp)
+                )
+            }
             if (listRecipe.isEmpty()) {
                 item {
                     Box(
@@ -94,6 +100,14 @@ fun FavoriteScreen(
                     onDelete = {
                         viewModel.deleteRecipe(recipe.id, recipe.imageUrl)
                     }
+                )
+            }
+
+            item {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .height(20.dp)
                 )
             }
         }

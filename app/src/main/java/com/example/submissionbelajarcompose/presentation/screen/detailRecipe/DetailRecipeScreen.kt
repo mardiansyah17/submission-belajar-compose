@@ -68,12 +68,12 @@ fun DetailRecipeScreen(
                     IconButton(
                         onClick = {
                             if (recipe != null) {
-                                viewModel.updateFavoriteRecipe(id, !recipe.favorite!!)
+                                viewModel.updateFavoriteRecipe(id, recipe.favorite == null)
                             }
                         }
                     ) {
                         if (recipe != null) {
-                            if (recipe.favorite!!) {
+                            if (recipe.favorite != null) {
                                 Icon(
                                     Icons.Default.Favorite,
                                     contentDescription = "Back",

@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.submissionbelajarcompose.model.Recipe
 import com.example.submissionbelajarcompose.repository.RecipeRepository
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.util.Date
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -28,10 +31,10 @@ class CreateRecipeViewModel @Inject constructor(
     val createRecipeUiInfo by lazy {
         MutableStateFlow(
             CreateRecipeUiInfo(
-                title = "Nasi goreng",
-                description = "Nasi goreng enak",
+                title = "",
+                description = "",
                 imageUrl = "",
-                ingredients = listOf("Nasi", "Telur", "")
+                ingredients = listOf("", "")
             )
         )
     }
@@ -54,6 +57,26 @@ class CreateRecipeViewModel @Inject constructor(
 
             is CreateRecipeEvent.CreateRecipe -> {
                 val recipe = createRecipeUiInfo.value
+
+                if (recipe.imageUrl.isEmpty()) {
+                    errorMsg.value = "Harap pilih gambar"
+                    return
+                }
+
+                if (recipe.title.isEmpty()) {
+                    errorMsg.value = "Judul resep tidak boleh kosong"
+                    return
+                }
+
+                if (recipe.description.isEmpty()) {
+                    errorMsg.value = "Deskripsi tidak boleh kosong"
+                    return
+                }
+
+                if (recipe.ingredients.filter { it.isNotEmpty() }.size < 2) {
+                    errorMsg.value = "Minimal 2 bahan"
+                    return
+                }
 
 
                 val bucket = supabaseClient.storage.from("recipe")
@@ -79,13 +102,13 @@ class CreateRecipeViewModel @Inject constructor(
 
                         recipeRepository.createRecipe(
                             Recipe(
-                                Uuid.random().toString(),
-                                recipe.title,
-                                recipe.description,
-                                imageUrl,
-                                recipe.ingredients.filter { it.isNotEmpty() },
-                                recipe.title.lowercase(),
-                                false,
+                                id = Uuid.random().toString(),
+                                createdAt = Timestamp.now(),
+                                title = recipe.title,
+                                description = recipe.description,
+                                imageUrl = imageUrl,
+                                ingredients = recipe.ingredients.filter { it.isNotEmpty() },
+                                titleLower = recipe.title.lowercase(),
                             )
                         )
 
@@ -131,7 +154,7 @@ class CreateRecipeViewModel @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "CreateRecipeViewModel"
+        private const val TAG = ""
     }
 }
 

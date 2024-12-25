@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.submissionbelajarcompose.model.Recipe
 import com.example.submissionbelajarcompose.repository.RecipeRepository
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,7 @@ class DetailRecipeViewModel @Inject constructor(
             _loading.value = true
             try {
                 val recipeResult = recipeRepository.getRecipe(id)
+
                 _recipe.value = recipeResult
             } catch (e: Exception) {
                 Log.e(TAG, "getRecipe: ${e.message}")
@@ -38,8 +41,13 @@ class DetailRecipeViewModel @Inject constructor(
     fun updateFavoriteRecipe(id: String, isFavorite: Boolean) {
         viewModelScope.launch {
             try {
-                recipeRepository.updateFavorite(id = id, isFavorite = isFavorite)
-                _recipe.value = recipe.value?.copy(favorite = isFavorite)
+                val favorit = if (isFavorite) {
+                    Timestamp.now()
+                } else {
+                    null
+                }
+                recipeRepository.updateFavorite(id = id, favorite = favorit)
+                _recipe.value = recipe.value?.copy(favorite = favorit)
 
             } catch (e: Exception) {
                 Log.e(TAG, "updateFavoriteRecipe: ${e.message}")

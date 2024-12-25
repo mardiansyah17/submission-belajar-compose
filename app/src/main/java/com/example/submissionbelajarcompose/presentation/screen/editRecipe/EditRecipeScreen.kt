@@ -84,6 +84,20 @@ fun EditRecipeScreen(
         )
     }
 
+    if (viewModel.errorMsg.value.isNotEmpty()) {
+        DialogMessage(
+            message = viewModel.errorMsg.value,
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.errorMsg.value = ""
+                }) {
+                    Text("Oke")
+                }
+            }
+        )
+    }
+
+
     if (viewModel.loading.value) {
         return Box(
             modifier = Modifier.fillMaxSize(),

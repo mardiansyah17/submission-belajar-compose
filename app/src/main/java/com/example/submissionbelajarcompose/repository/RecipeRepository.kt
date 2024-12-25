@@ -2,7 +2,10 @@ package com.example.submissionbelajarcompose.repository
 
 import android.util.Log
 import com.example.submissionbelajarcompose.model.Recipe
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -28,12 +31,14 @@ class RecipeRepository @Inject constructor(
     suspend fun getRecipes(): List<Recipe> {
         return try {
             val querySnapshot = firestore.collection("recipes")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .await()
             val mapData = querySnapshot.documents.map { document ->
 
                 Recipe(
                     id = document.id,
+                    createdAt = document.getTimestamp("createdAt")!!,
                     title = document.getString("title")!!,
                     description = document.getString("description")!!,
                     imageUrl = document.getString("imageUrl")!!,
@@ -51,18 +56,21 @@ class RecipeRepository @Inject constructor(
     suspend fun getFavoriteRecipes(): List<Recipe> {
         return try {
             val querySnapshot = firestore.collection("recipes")
-                .whereEqualTo("favorite", true)
+                .whereNotEqualTo("favorite", null)
+                .orderBy("favorite", Query.Direction.DESCENDING)
                 .get()
                 .await()
             val mapData = querySnapshot.documents.map { document ->
 
                 Recipe(
                     id = document.id,
+                    createdAt = document.getTimestamp("createdAt")!!,
                     title = document.getString("title")!!,
                     description = document.getString("description")!!,
                     imageUrl = document.getString("imageUrl")!!,
-                    ingredients = document.get("ingredients") as List<String>
-                )
+                    ingredients = document.get("ingredients") as List<String>,
+
+                    )
 
             }
             mapData
@@ -81,11 +89,12 @@ class RecipeRepository @Inject constructor(
                 .await()
             Recipe(
                 id = documentSnapshot.id,
+                createdAt = documentSnapshot.getTimestamp("createdAt")!!,
                 title = documentSnapshot.getString("title")!!,
                 description = documentSnapshot.getString("description")!!,
                 imageUrl = documentSnapshot.getString("imageUrl")!!,
                 ingredients = documentSnapshot.get("ingredients") as List<String>,
-                favorite = documentSnapshot.getBoolean("favorite")
+                favorite = documentSnapshot.getTimestamp("favorite")
             )
         } catch (e: Exception) {
             Log.e("RecipeRepository", "Error getting recipe", e)
@@ -126,12 +135,11 @@ class RecipeRepository @Inject constructor(
                 .get()
                 .await()
 
-            Log.d("RecipeRepository", "Search query: $querySnapshot")
-
             val mapData = querySnapshot.documents.map { document ->
 
                 Recipe(
                     id = document.id,
+                    createdAt = document.getTimestamp("createdAt")!!,
                     title = document.getString("title")!!,
                     description = document.getString("description")!!,
                     imageUrl = document.getString("imageUrl")!!,
@@ -146,11 +154,11 @@ class RecipeRepository @Inject constructor(
         }
     }
 
-    suspend fun updateFavorite(id: String, isFavorite: Boolean) {
+    suspend fun updateFavorite(id: String, favorite: Timestamp?) {
         try {
             firestore.collection("recipes")
                 .document(id)
-                .update("favorite", isFavorite)
+                .update("favorite", favorite)
                 .await()
         } catch (e: Exception) {
             Log.e("RecipeRepository", "Error updating favorite", e)

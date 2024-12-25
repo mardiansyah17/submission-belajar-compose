@@ -9,5 +9,7 @@ sealed class TabNavigationGraph(val route: String) {
     data object HomeScreen : TabNavigationGraph("home_screen")
     data object CreateScreen : TabNavigationGraph("create_screen")
     data object FavoriteScreen : TabNavigationGraph("favorite_screen")
+    data object AboutScreen : TabNavigationGraph("about_page")
+
 
 }

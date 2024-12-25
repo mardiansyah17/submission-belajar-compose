@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.submissionbelajarcompose.model.Recipe
 import com.example.submissionbelajarcompose.repository.RecipeRepository
+import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
@@ -31,6 +32,7 @@ class EditRecipeViewModel @Inject constructor(
         MutableStateFlow(
             EditRecipeUiInfo(
                 title = "",
+                createdAt = Timestamp.now(),
                 description = "",
                 imageUrl = "",
                 ingredients = listOf("", "")
@@ -39,6 +41,7 @@ class EditRecipeViewModel @Inject constructor(
     }
 
     val successMsg = mutableStateOf("")
+    val errorMsg = mutableStateOf("")
     val loading = mutableStateOf(false)
     private val prevImage = mutableStateOf("")
 
@@ -49,6 +52,7 @@ class EditRecipeViewModel @Inject constructor(
                 val recipeResult = recipeRepository.getRecipe(id)
                 editRecipeUiInfo.value = EditRecipeUiInfo(
                     title = recipeResult.title,
+                    createdAt = recipeResult.createdAt,
                     description = recipeResult.description,
                     imageUrl = recipeResult.imageUrl,
                     ingredients = recipeResult.ingredients
@@ -77,6 +81,26 @@ class EditRecipeViewModel @Inject constructor(
             is EditRecipeEvent.UpdateRecipe -> {
                 val recipe = editRecipeUiInfo.value
 
+
+                if (recipe.imageUrl.isEmpty()) {
+                    errorMsg.value = "Harap pilih gambar"
+                    return
+                }
+
+                if (recipe.title.isEmpty()) {
+                    errorMsg.value = "Judul resep tidak boleh kosong"
+                    return
+                }
+
+                if (recipe.description.isEmpty()) {
+                    errorMsg.value = "Deskripsi tidak boleh kosong"
+                    return
+                }
+
+                if (recipe.ingredients.filter { it.isNotEmpty() }.size < 2) {
+                    errorMsg.value = "Minimal 2 bahan"
+                    return
+                }
 
                 viewModelScope.launch {
                     try {
@@ -108,6 +132,7 @@ class EditRecipeViewModel @Inject constructor(
                         recipeRepository.updateRecipe(
                             Recipe(
                                 id = event.id,
+                                createdAt = recipe.createdAt,
                                 title = recipe.title,
                                 description = recipe.description,
                                 imageUrl = updateImage,
@@ -166,6 +191,7 @@ class EditRecipeViewModel @Inject constructor(
 
 data class EditRecipeUiInfo(
     val title: String,
+    val createdAt: Timestamp,
     val description: String,
     val imageUrl: String,
     val ingredients: List<String>,
