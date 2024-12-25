@@ -29,6 +29,7 @@ import com.example.submissionbelajarcompose.presentation.components.EmptyLayout
 import com.example.submissionbelajarcompose.presentation.components.InputTextField
 import com.example.submissionbelajarcompose.presentation.components.PullToRefreshBox
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
+import com.example.submissionbelajarcompose.presentation.navigation.TabNavigationGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,99 +42,77 @@ fun HomeScreen(
     val state = rememberPullToRefreshState()
     val isRefreshing = remember { mutableStateOf(false) }
     val loading = homeViewModel.loading.collectAsState().value
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navHostController.navigate(NavigationGraph.CreateScreen.route) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.extraLarge,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
+    PullToRefreshBox(
+        state = state,
+        isRefreshing = isRefreshing.value,
+        onRefresh = {
+            homeViewModel.getRecipes()
+        }
+    ) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .fillMaxSize()
+        ) {
+            // Input untuk pencarian
+            item {
+                InputTextField(
+                    text = homeViewModel.query.value,
+                    maxLine = 1,
+                    label = "Cari Resep",
+                ) {
+                    homeViewModel.query.value = it
+                    homeViewModel.searchRecipe(it)
+                }
+            }
+
+            if (loading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                return@LazyColumn
+            }
+
+            // Empty State
+            if (listRecipe.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        EmptyLayout()
+                    }
+                }
+                return@LazyColumn
+            }
+
+
+
+
+            items(homeViewModel.recipes.value.size) { index ->
+                val recipe = listRecipe[index]
+                CardRecipe(
+                    title = recipe.title,
+                    description = recipe.description,
+                    imageUrl = recipe.imageUrl,
+                    onClick = {
+                        navHostController.navigate(NavigationGraph.DetailScreen(recipe.id).route)
+                    },
+                    onEdit = {},
+                    onDelete = {
+                        homeViewModel.deleteRecipe(recipe.id, recipe.imageUrl)
+                    }
                 )
             }
-        },
-
-        ) { pading ->
-
-        PullToRefreshBox(
-            state = state,
-            modifier = Modifier.padding(pading),
-            isRefreshing = isRefreshing.value,
-            onRefresh = {
-                homeViewModel.getRecipes()
-            }
-        ) {
-
-
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxSize()
-            ) {
-                // Input untuk pencarian
-                item {
-                    InputTextField(
-                        text = homeViewModel.query.value,
-                        maxLine = 1,
-                        label = "Cari Resep",
-                    ) {
-                        homeViewModel.query.value = it
-                        homeViewModel.searchRecipe(it)
-                    }
-                }
-
-                // Loading Indicator
-                if (loading) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    // Berhenti di sini, tidak melanjutkan ke elemen lainnya jika masih loading
-                    return@LazyColumn
-                }
-
-                // Empty State
-                if (listRecipe.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            EmptyLayout()
-                        }
-                    }
-                    return@LazyColumn
-                }
-
-
-
-
-                items(homeViewModel.recipes.value.size) { index ->
-                    val recipe = listRecipe[index]
-                    CardRecipe(
-                        title = recipe.title,
-                        description = recipe.description,
-                        imageUrl = recipe.imageUrl,
-                        onClick = {
-                            navHostController.navigate(NavigationGraph.DetailScreen(recipe.id).route)
-                        },
-                        onEdit = {},
-                        onDelete = {
-                            homeViewModel.deleteRecipe(recipe.id, recipe.imageUrl)
-                        }
-                    )
-                }
-            }
-
         }
+
     }
 }

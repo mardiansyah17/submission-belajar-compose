@@ -40,6 +40,7 @@ import com.example.submissionbelajarcompose.presentation.components.AppButton
 import com.example.submissionbelajarcompose.presentation.components.DialogMessage
 import com.example.submissionbelajarcompose.presentation.components.InputTextField
 import com.example.submissionbelajarcompose.presentation.navigation.NavigationGraph
+import com.example.submissionbelajarcompose.presentation.navigation.TabNavigationGraph
 
 @Composable
 fun CreateRecipe(
@@ -64,7 +65,7 @@ fun CreateRecipe(
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.successMsg.value = ""
-                    navHostController.navigate(NavigationGraph.HomeScreen.route) {
+                    navHostController.navigate(TabNavigationGraph.HomeScreen.route) {
                         popUpTo(0)
 
                     }
